@@ -1,8 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { BrowserSpeechToText, BrowserTextToSpeech } from '@/adapters/speech/browser'
-import type { VoiceState } from '@/core/ports/speech'
+import {
+  type SpeechAvailability,
+  selectSpeechToText,
+  selectTextToSpeech,
+} from '@/adapters/speech/select'
+import { useVoiceMood, type VoiceMood } from '@/components/VoiceMood'
+import type { SpeechToTextProvider, TextToSpeechProvider, VoiceState } from '@/core/ports/speech'
 
 interface VoiceControlProps {
   /** Called with the final transcript when the user finishes speaking. */
@@ -11,7 +16,11 @@ interface VoiceControlProps {
   onInterimTranscript?: (text: string) => void
   /** Text the assistant just said, offered for reading aloud. */
   speakText?: string | null
+  /** Which hosted voice providers the server has configured. */
+  speech?: SpeechAvailability
 }
+
+const NO_HOSTED_SPEECH: SpeechAvailability = { hostedStt: false, hostedTts: false }
 
 const STATE_COPY: Record<VoiceState, string> = {
   idle: 'Ready',
@@ -51,6 +60,7 @@ export function VoiceControl({
   onFinalTranscript,
   onInterimTranscript,
   speakText,
+  speech = NO_HOSTED_SPEECH,
 }: VoiceControlProps) {
   const [state, setState] = useState<VoiceState>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -58,8 +68,14 @@ export function VoiceControl({
   const [handsFree, setHandsFree] = useState(false)
   const [available, setAvailable] = useState<{ stt: boolean; tts: boolean } | null>(null)
 
-  const sttRef = useRef(new BrowserSpeechToText())
-  const ttsRef = useRef(new BrowserTextToSpeech())
+  // Pick hosted (Deepgram / ElevenLabs) or browser adapters once, from the
+  // server-provided flags. Both satisfy the same port, so nothing below cares.
+  const sttRef = useRef<SpeechToTextProvider | null>(null)
+  const ttsRef = useRef<TextToSpeechProvider | null>(null)
+  if (sttRef.current === null) sttRef.current = selectSpeechToText(speech)
+  if (ttsRef.current === null) ttsRef.current = selectTextToSpeech(speech)
+  const stt = sttRef.current
+  const tts = ttsRef.current
   const stopRef = useRef<(() => void) | null>(null)
   const finalRef = useRef('')
 
@@ -67,10 +83,27 @@ export function VoiceControl({
   // window, and rendering a mic button that cannot work would be fake UI.
   useEffect(() => {
     setAvailable({
-      stt: sttRef.current.isAvailable(),
-      tts: ttsRef.current.isAvailable(),
+      stt: stt.isAvailable(),
+      tts: tts.isAvailable(),
     })
-  }, [])
+  }, [stt, tts])
+
+  // Feed the voice state to the ambient background, so it warms while listening,
+  // cools while thinking, and settles while speaking. Reset to idle on the way
+  // out so leaving /talk does not strand the background in a lit state.
+  const { setMood } = useVoiceMood()
+  useEffect(() => {
+    const moodByState: Record<VoiceState, VoiceMood> = {
+      idle: 'idle',
+      muted: 'idle',
+      error: 'idle',
+      listening: 'listening',
+      thinking: 'thinking',
+      speaking: 'speaking',
+    }
+    setMood(moodByState[state])
+  }, [state, setMood])
+  useEffect(() => () => setMood('idle'), [setMood])
 
   const stopListening = useCallback(() => {
     stopRef.current?.()
@@ -84,7 +117,7 @@ export function VoiceControl({
     finalRef.current = ''
     setState('listening')
 
-    stopRef.current = await sttRef.current.start({
+    stopRef.current = await stt.start({
       onTranscript: (chunk) => {
         if (chunk.isFinal) {
           finalRef.current = `${finalRef.current} ${chunk.text}`.trim()
@@ -116,11 +149,11 @@ export function VoiceControl({
         }
       },
     })
-  }, [handsFree, onFinalTranscript, onInterimTranscript])
+  }, [handsFree, onFinalTranscript, onInterimTranscript, stt])
 
   const speak = useCallback(() => {
     if (!speakText) return
-    ttsRef.current.speak(speakText, {
+    tts.speak(speakText, {
       onStart: () => setState('speaking'),
       onEnd: () => setState('idle'),
       onError: (message) => {
@@ -128,20 +161,20 @@ export function VoiceControl({
         setState('error')
       },
     })
-  }, [speakText])
+  }, [speakText, tts])
 
   const stopSpeaking = useCallback(() => {
-    ttsRef.current.stop()
+    tts.stop()
     setState('idle')
-  }, [])
+  }, [tts])
 
   // Stop everything if the component goes away mid-utterance.
   useEffect(() => {
     return () => {
       stopRef.current?.()
-      ttsRef.current.stop()
+      tts.stop()
     }
-  }, [])
+  }, [tts])
 
   if (available === null) {
     return <div className="h-9" aria-hidden="true" />
@@ -237,6 +270,14 @@ export function VoiceControl({
 
       <p className="mt-2 text-xs text-ink-faint">
         Audio is never saved. Only the text transcript is kept, as part of the conversation.
+        {stt.id === 'deepgram' || tts.id === 'elevenlabs'
+          ? ` Speech is processed by ${[
+              stt.id === 'deepgram' ? 'Deepgram' : null,
+              tts.id === 'elevenlabs' ? 'ElevenLabs' : null,
+            ]
+              .filter(Boolean)
+              .join(' and ')} and is not stored there.`
+          : ''}
       </p>
     </div>
   )

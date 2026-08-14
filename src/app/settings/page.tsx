@@ -6,6 +6,8 @@ import { connectedAccounts, jobRuns, reminders, userPreferences } from '@/db/sch
 import { getModelProvider } from '@/server/ai/gateway'
 import { checkMicrosoftEnv } from '@/server/env'
 import { getSession } from '@/server/session'
+import { checkDeepgramEnv, isDeepgramConfigured } from '@/server/speech/deepgram'
+import { checkElevenLabsEnv, isElevenLabsConfigured } from '@/server/speech/elevenlabs'
 import {
   disconnectAccountAction,
   runBriefingNow,
@@ -28,6 +30,10 @@ export default async function SettingsPage({
   const db = await getDb()
   const provider = getModelProvider()
   const msEnv = checkMicrosoftEnv()
+  const deepgramEnv = checkDeepgramEnv()
+  const elevenLabsEnv = checkElevenLabsEnv()
+  const deepgramReady = isDeepgramConfigured()
+  const elevenLabsReady = isElevenLabsConfigured()
 
   // Outcome of a just-completed connection attempt, handed back by the OAuth
   // callback as a query parameter.
@@ -398,6 +404,67 @@ export default async function SettingsPage({
             {revokedAccounts.length} previously connected{' '}
             {revokedAccounts.length === 1 ? 'account has' : 'accounts have'} been disconnected.
             Their credentials were destroyed.
+          </p>
+        ) : null}
+      </section>
+
+      {/* --- Voice providers -------------------------------------------- */}
+      <section className="mb-8 rounded-card border border-line bg-surface p-5">
+        <h2 className="text-sm font-semibold text-ink">Voice</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Whether hosted speech providers are set up. These are optional — voice works without them.
+        </p>
+
+        <div className="mt-4 space-y-4">
+          {/* Speech-to-text */}
+          <div>
+            <p className="text-sm font-medium text-ink">Speech-to-text (Deepgram)</p>
+            {deepgramReady ? (
+              <p className="mt-1 text-sm text-ink-muted">
+                Configured — Momentum will transcribe your voice with Deepgram.
+              </p>
+            ) : (
+              <div className="mt-2 rounded-md border border-line bg-surface-sunken p-3">
+                <p className="text-sm font-medium text-ink">
+                  Not configured yet. {deepgramEnv.problems.length}{' '}
+                  {deepgramEnv.problems.length === 1 ? 'thing is' : 'things are'} missing:
+                </p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-muted">
+                  {deepgramEnv.problems.map((problem) => (
+                    <li key={problem}>{problem}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Text-to-speech */}
+          <div>
+            <p className="text-sm font-medium text-ink">Text-to-speech (ElevenLabs)</p>
+            {elevenLabsReady ? (
+              <p className="mt-1 text-sm text-ink-muted">
+                Configured — replies can be read aloud in an ElevenLabs voice.
+              </p>
+            ) : (
+              <div className="mt-2 rounded-md border border-line bg-surface-sunken p-3">
+                <p className="text-sm font-medium text-ink">
+                  Not configured yet. {elevenLabsEnv.problems.length}{' '}
+                  {elevenLabsEnv.problems.length === 1 ? 'thing is' : 'things are'} missing:
+                </p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-muted">
+                  {elevenLabsEnv.problems.map((problem) => (
+                    <li key={problem}>{problem}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {!deepgramReady && !elevenLabsReady ? (
+          <p className="mt-4 text-xs text-ink-faint">
+            No hosted voice is configured. Voice still works using your browser&rsquo;s built-in
+            speech, which varies by browser.
           </p>
         ) : null}
       </section>

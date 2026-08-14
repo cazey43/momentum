@@ -5,6 +5,7 @@ import { getDb } from '@/db/client'
 import { conversations, messages, proposedActions } from '@/db/schema'
 import { getModelProvider } from '@/server/ai/gateway'
 import { getSession } from '@/server/session'
+import { getSpeechAvailability } from '@/server/speech/config'
 import { approveProposedAction, dismissProposedAction, sendChatMessage } from './actions'
 
 export const metadata = { title: 'Talk' }
@@ -128,6 +129,7 @@ export default async function TalkPage() {
         action={sendChatMessage}
         conversationId={latestConversation?.id ?? null}
         lastReply={lastAssistantReply}
+        speech={getSpeechAvailability()}
       />
     </div>
   )

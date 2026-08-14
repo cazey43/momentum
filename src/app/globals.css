@@ -138,3 +138,156 @@
   white-space: nowrap;
   border-width: 0;
 }
+
+/*
+ * Ambient voice-reactive background.
+ *
+ * Decorative and non-interactive, painted behind all content. The orbs drift on
+ * their own; their colour and energy follow the shared voice mood set on the
+ * /talk page. The reduced-motion block above freezes the drift, leaving a calm
+ * static wash.
+ *
+ * The mood custom properties are registered with @property so a change of mood
+ * interpolates from one palette to the next rather than snapping.
+ */
+@property --ambient-a {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --ambient-b {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --ambient-energy {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.35;
+}
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  --ambient-a: var(--color-accent);
+  --ambient-b: var(--color-waiting);
+  --ambient-energy: 0.35;
+  transition:
+    --ambient-a 1.4s ease,
+    --ambient-b 1.4s ease,
+    --ambient-energy 1.4s ease;
+}
+
+.ambient__orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  opacity: calc(0.16 + var(--ambient-energy) * 0.24);
+  will-change: transform;
+}
+
+.ambient__orb--1 {
+  width: 46vmax;
+  height: 46vmax;
+  left: -10vmax;
+  top: -8vmax;
+  background: radial-gradient(circle at center, var(--ambient-a), transparent 70%);
+  animation: ambient-drift-1 28s ease-in-out infinite;
+}
+
+.ambient__orb--2 {
+  width: 38vmax;
+  height: 38vmax;
+  right: -8vmax;
+  top: 8vmax;
+  background: radial-gradient(circle at center, var(--ambient-b), transparent 70%);
+  animation: ambient-drift-2 34s ease-in-out infinite;
+}
+
+.ambient__orb--3 {
+  width: 42vmax;
+  height: 42vmax;
+  left: 18vmax;
+  bottom: -14vmax;
+  background: radial-gradient(circle at center, var(--ambient-a), transparent 72%);
+  animation: ambient-drift-3 40s ease-in-out infinite;
+}
+
+@keyframes ambient-drift-1 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(7vmax, 5vmax, 0) scale(1.12);
+  }
+  66% {
+    transform: translate3d(-5vmax, 9vmax, 0) scale(0.94);
+  }
+}
+
+@keyframes ambient-drift-2 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-8vmax, 6vmax, 0) scale(1.1);
+  }
+}
+
+@keyframes ambient-drift-3 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  40% {
+    transform: translate3d(6vmax, -6vmax, 0) scale(1.08);
+  }
+  75% {
+    transform: translate3d(-6vmax, -3vmax, 0) scale(0.96);
+  }
+}
+
+.ambient[data-mood="idle"] {
+  --ambient-a: var(--color-accent);
+  --ambient-b: var(--color-waiting);
+  --ambient-energy: 0.35;
+}
+
+.ambient[data-mood="listening"] {
+  --ambient-a: var(--color-urgent);
+  --ambient-b: var(--color-accent);
+  --ambient-energy: 1;
+}
+
+.ambient[data-mood="thinking"] {
+  --ambient-a: var(--color-waiting);
+  --ambient-b: var(--color-accent);
+  --ambient-energy: 0.68;
+}
+
+.ambient[data-mood="speaking"] {
+  --ambient-a: var(--color-done);
+  --ambient-b: var(--color-waiting);
+  --ambient-energy: 0.9;
+}
+
+/* A gentle breath while actively listening or speaking. */
+.ambient[data-mood="listening"],
+.ambient[data-mood="speaking"] {
+  animation: ambient-breathe 3s ease-in-out infinite;
+}
+
+@keyframes ambient-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.82;
+  }
+}

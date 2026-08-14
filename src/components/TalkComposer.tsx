@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import type { SpeechAvailability } from '@/adapters/speech/select'
 import { VoiceControl } from '@/components/VoiceControl'
 
 interface TalkComposerProps {
@@ -9,6 +10,8 @@ interface TalkComposerProps {
   conversationId: string | null
   /** The assistant's most recent reply, offered for reading aloud. */
   lastReply: string | null
+  /** Which hosted voice providers the server has configured. */
+  speech: SpeechAvailability
 }
 
 /**
@@ -20,13 +23,14 @@ interface TalkComposerProps {
  * is about to be sent and can correct it — speech recognition is wrong often
  * enough that sending a transcript unseen would be a mistake.
  */
-export function TalkComposer({ action, conversationId, lastReply }: TalkComposerProps) {
+export function TalkComposer({ action, conversationId, lastReply, speech }: TalkComposerProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [value, setValue] = useState('')
 
   return (
     <div className="mt-6 space-y-3">
       <VoiceControl
+        speech={speech}
         speakText={lastReply}
         onInterimTranscript={(text) => setValue(text)}
         onFinalTranscript={(text) => {

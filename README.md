@@ -162,6 +162,24 @@ Momentum never requests `Mail.Send`, `Mail.ReadWrite`, or any delete
 permission. The read-only provider class does not implement `sendReply`, so
 even an approved draft cannot be sent through it.
 
+### Voice (optional)
+
+Momentum can use hosted speech instead of the browser's built-in engine.
+[Deepgram](https://console.deepgram.com) handles speech-to-text and
+[ElevenLabs](https://elevenlabs.io) handles text-to-speech. The keys are read
+server-side and slot in behind the same speech ports. When any of them is
+missing, voice **falls back to the browser Web Speech API** — the existing
+behavior — so this is purely additive.
+
+Add to `.env.local`:
+
+```
+DEEPGRAM_API_KEY=            # console.deepgram.com → API Keys
+ELEVENLABS_API_KEY=          # elevenlabs.io → Profile → API Keys
+ELEVENLABS_VOICE_ID=         # elevenlabs.io → Voices (the id, not the name)
+ELEVENLABS_MODEL_ID=         # optional, defaults to eleven_turbo_v2_5
+```
+
 ### Encryption key
 
 Required before connecting any account:

@@ -40,6 +40,8 @@ export const RATE_LIMITS = {
   send: { limit: 5, windowMs: 60_000 },
   /** Full data export reads everything; no reason to do it repeatedly. */
   export: { limit: 3, windowMs: 60_000 },
+  /** Hosted speech (STT/TTS) costs per call; generous, but not an open tap. */
+  speech: { limit: 40, windowMs: 60_000 },
 } as const satisfies Record<string, RateLimitOptions>
 
 export function checkRateLimit(
