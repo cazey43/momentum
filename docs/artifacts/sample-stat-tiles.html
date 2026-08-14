@@ -1,0 +1,103 @@
+<!--
+  CHANGELOG
+  - v1: initial sample — three Momentum-styled stat tiles + primary action.
+  Self-contained smoke-test artifact for the visual workflow. Placeholder data.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentum — sample stat tiles</title>
+<style>
+  /* Momentum OKLCH tokens, inlined so the artifact is self-contained. */
+  :root {
+    --canvas: oklch(0.985 0.004 95);
+    --surface: oklch(1 0 0);
+    --line: oklch(0.9 0.006 95);
+    --ink: oklch(0.26 0.012 75);
+    --ink-muted: oklch(0.52 0.012 75);
+    --accent: oklch(0.54 0.1 55);
+    --on-accent: oklch(1 0 0);
+    --urgent: oklch(0.52 0.16 28);
+    --urgent-soft: oklch(0.96 0.03 28);
+    --waiting: oklch(0.52 0.07 250);
+    --done: oklch(0.5 0.08 150);
+    --radius: 0.75rem;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas: oklch(0.19 0.008 75);
+      --surface: oklch(0.235 0.009 75);
+      --line: oklch(0.31 0.01 75);
+      --ink: oklch(0.93 0.006 85);
+      --ink-muted: oklch(0.72 0.01 85);
+      --accent: oklch(0.72 0.1 58);
+      --on-accent: oklch(0.19 0.008 75);
+      --urgent: oklch(0.7 0.14 30);
+      --urgent-soft: oklch(0.3 0.05 30);
+      --waiting: oklch(0.72 0.07 250);
+      --done: oklch(0.7 0.08 150);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem; font-family: var(--font);
+    background: var(--canvas); color: var(--ink);
+  }
+  .wrap { max-width: 60rem; margin: 0 auto; }
+  h1 { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.25rem; }
+  .sub { color: var(--ink-muted); margin: 0 0 1.5rem; font-size: 0.9rem; }
+  .grid {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+  .tile {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 1.25rem;
+  }
+  .tile .label { color: var(--ink-muted); font-size: 0.8rem; margin: 0; }
+  .tile .value { font-size: 2rem; font-weight: 650; margin: 0.25rem 0 0; }
+  .tag { display: inline-block; margin-top: 0.75rem; padding: 0.15rem 0.5rem;
+    border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+  .tag.urgent { background: var(--urgent-soft); color: var(--urgent); }
+  .dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; display: inline-block; }
+  .row { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.75rem;
+    color: var(--ink-muted); font-size: 0.8rem; }
+  .actions { margin-top: 1.5rem; }
+  .btn {
+    font: inherit; font-weight: 600; cursor: pointer;
+    background: var(--accent); color: var(--on-accent);
+    border: none; border-radius: var(--radius); padding: 0.7rem 1.1rem;
+  }
+  .btn:focus-visible { outline: 3px solid var(--waiting); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Today at a glance</h1>
+    <p class="sub">Sample artifact — placeholder data only.</p>
+    <section class="grid">
+      <article class="tile">
+        <p class="label">Needs you today</p>
+        <p class="value">2</p>
+        <span class="tag urgent">1 overdue</span>
+      </article>
+      <article class="tile">
+        <p class="label">Waiting on others</p>
+        <p class="value">5</p>
+        <span class="row"><span class="dot" style="background:var(--waiting)"></span> longest: 4 days</span>
+      </article>
+      <article class="tile">
+        <p class="label">Cleared this week</p>
+        <p class="value">12</p>
+        <span class="row"><span class="dot" style="background:var(--done)"></span> on track</span>
+      </article>
+    </section>
+    <div class="actions">
+      <button class="btn" type="button">Talk to Momentum</button>
+    </div>
+  </main>
+</body>
+</html>
