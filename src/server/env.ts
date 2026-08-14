@@ -11,16 +11,13 @@ import { z } from 'zod'
  * reports precisely what is missing and how to fix it.
  */
 
-const base64Key32 = z
-  .string()
-  .min(1, 'must not be empty')
-  .refine((value) => {
-    try {
-      return Buffer.from(value, 'base64').length === 32
-    } catch {
-      return false
-    }
-  }, 'must be 32 bytes, base64-encoded')
+const base64Key32 = z.string().refine((value) => {
+  try {
+    return Buffer.from(value, 'base64').length === 32
+  } catch {
+    return false
+  }
+}, 'must be 32 bytes, base64-encoded')
 
 const microsoftSchema = z.object({
   MS_GRAPH_CLIENT_ID: z.string().min(1),
