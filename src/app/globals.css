@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+/*
+ * Momentum's palette is deliberately quiet. This is an app that speaks up at
+ * most twice a day, so the interface should read as calm rather than urgent.
+ * Saturated color is reserved for genuine time pressure — if everything is
+ * highlighted, nothing is.
+ *
+ * `@theme` must stay at the top level: Tailwind v4 reads it at build time to
+ * generate utilities. Dark mode therefore overrides the generated custom
+ * properties on :root below, rather than declaring a second @theme block.
+ */
+@theme {
+  --color-canvas: oklch(0.985 0.004 95);
+  --color-surface: oklch(1 0 0);
+  --color-surface-sunken: oklch(0.968 0.005 95);
+  --color-line: oklch(0.9 0.006 95);
+  --color-line-strong: oklch(0.82 0.008 95);
+
+  /*
+   * Every foreground value below was chosen by computing its WCAG contrast
+   * against the surfaces it actually sits on, not by eye. The axe suite caught
+   * the original palette failing at 3.12:1; these all clear 4.5:1 on every
+   * background they are paired with. Do not lighten them without re-checking.
+   */
+  --color-ink: oklch(0.26 0.012 75); /* 15.6:1 on surface */
+  --color-ink-muted: oklch(0.52 0.012 75); /* 5.5:1 */
+  --color-ink-faint: oklch(0.54 0.01 75); /* 5.1:1 surface, 4.6:1 sunken */
+
+  /* Accent: a warm, low-chroma clay. Primary actions only. */
+  --color-accent: oklch(0.54 0.1 55); /* 5.2:1 with on-accent */
+  --color-accent-hover: oklch(0.48 0.11 55); /* 6.8:1 */
+  --color-accent-soft: oklch(0.95 0.025 60); /* 13.4:1 with ink */
+
+  /* Foreground for text sitting on a filled accent/urgent button. A token
+     rather than a literal `white`, because the correct choice inverts in dark
+     mode where those fills are light. */
+  --color-on-accent: oklch(1 0 0);
+  --color-on-urgent: oklch(1 0 0);
+
+  /* Semantic. `urgent` is intentionally the only high-chroma color. */
+  --color-urgent: oklch(0.52 0.16 28); /* 5.2:1 on urgent-soft */
+  --color-urgent-soft: oklch(0.96 0.03 28);
+  --color-waiting: oklch(0.52 0.07 250); /* 4.9:1 on waiting-soft */
+  --color-waiting-soft: oklch(0.96 0.02 250);
+  --color-done: oklch(0.5 0.08 150); /* 5.2:1 on done-soft */
+  --color-done-soft: oklch(0.96 0.025 150);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-card: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: oklch(0.19 0.008 75);
+    --color-surface: oklch(0.235 0.009 75);
+    --color-surface-sunken: oklch(0.21 0.008 75);
+    --color-line: oklch(0.31 0.01 75);
+    --color-line-strong: oklch(0.4 0.012 75);
+
+    --color-ink: oklch(0.93 0.006 85);
+    --color-ink-muted: oklch(0.72 0.01 85);
+    --color-ink-faint: oklch(0.65 0.01 85); /* 5.2:1 on dark surface */
+
+    /* Accent fills are light in dark mode, so their foreground inverts to dark
+       ink. Keeping `text-white` here would have produced ~2:1. */
+    --color-accent: oklch(0.72 0.1 58);
+    --color-accent-hover: oklch(0.78 0.1 58);
+    --color-accent-soft: oklch(0.3 0.04 55);
+    --color-on-accent: oklch(0.19 0.008 75);
+    --color-on-urgent: oklch(0.19 0.008 75);
+
+    --color-urgent: oklch(0.7 0.14 30);
+    --color-urgent-soft: oklch(0.3 0.05 30);
+    --color-waiting: oklch(0.72 0.07 250);
+    --color-waiting-soft: oklch(0.28 0.03 250);
+    --color-done: oklch(0.7 0.08 150);
+    --color-done-soft: oklch(0.28 0.035 150);
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Never remove focus indication — keyboard navigation is a stated
+     requirement, not a nice-to-have. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft);
+  }
+}
+
+/*
+ * Respect the OS-level reduced-motion setting everywhere, including markup we
+ * do not directly control.
+ *
+ * `!important` is correct here and is not a specificity shortcut: this block
+ * must defeat animation declarations of arbitrary specificity, including
+ * inline styles set by third-party scripts. This is the canonical
+ * implementation of the pattern, so `noImportantStyles` is disabled for this
+ * file in biome.json.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible only to screen readers, and to sighted users on keyboard focus. */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
