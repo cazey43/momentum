@@ -160,10 +160,15 @@
   inherits: true;
   initial-value: transparent;
 }
+@property --ambient-c {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
 @property --ambient-energy {
   syntax: "<number>";
   inherits: true;
-  initial-value: 0.35;
+  initial-value: 0.4;
 }
 
 .ambient {
@@ -172,12 +177,32 @@
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  --ambient-a: var(--color-accent);
-  --ambient-b: var(--color-waiting);
-  --ambient-energy: 0.35;
+
+  /*
+   * Art-directed aura palette: navy → teal/aqua → violet → magenta, with a deep
+   * indigo shadow tone. Vivid on purpose; the orbs stay behind opaque content.
+   */
+  --aura-indigo: #0d093c;
+  --aura-navy: #0c2273;
+  --aura-cobalt: #1632d0;
+  --aura-ocean: #2e629a;
+  --aura-teal: #4293a8;
+  --aura-aqua: #5ac3ba;
+  --aura-deep-violet: #3b0875;
+  --aura-purple: #621a9d;
+  --aura-electric: #540fbf;
+  --aura-neon: #7920eb;
+  --aura-orchid: #933cb0;
+  --aura-magenta: #d66ece;
+
+  --ambient-a: var(--aura-navy);
+  --ambient-b: var(--aura-ocean);
+  --ambient-c: var(--aura-deep-violet);
+  --ambient-energy: 0.4;
   transition:
     --ambient-a 1.4s ease,
     --ambient-b 1.4s ease,
+    --ambient-c 1.4s ease,
     --ambient-energy 1.4s ease;
 }
 
@@ -185,7 +210,7 @@
   position: absolute;
   border-radius: 9999px;
   filter: blur(64px);
-  opacity: calc(0.16 + var(--ambient-energy) * 0.24);
+  opacity: calc(0.2 + var(--ambient-energy) * 0.32);
   will-change: transform;
 }
 
@@ -212,7 +237,7 @@
   height: 42vmax;
   left: 18vmax;
   bottom: -14vmax;
-  background: radial-gradient(circle at center, var(--ambient-a), transparent 72%);
+  background: radial-gradient(circle at center, var(--ambient-c), transparent 72%);
   animation: ambient-drift-3 40s ease-in-out infinite;
 }
 
@@ -252,27 +277,37 @@
   }
 }
 
+/*
+ * Each mood pulls a coordinated trio from the aura palette. Idle rests in the
+ * deep navy/indigo end; listening runs hot into magenta/violet; thinking cools
+ * to purple/cobalt; speaking brightens to teal/aqua. Across the states the whole
+ * navy → teal/aqua → violet → magenta sweep is present.
+ */
 .ambient[data-mood="idle"] {
-  --ambient-a: var(--color-accent);
-  --ambient-b: var(--color-waiting);
-  --ambient-energy: 0.35;
+  --ambient-a: var(--aura-navy);
+  --ambient-b: var(--aura-ocean);
+  --ambient-c: var(--aura-deep-violet);
+  --ambient-energy: 0.4;
 }
 
 .ambient[data-mood="listening"] {
-  --ambient-a: var(--color-urgent);
-  --ambient-b: var(--color-accent);
+  --ambient-a: var(--aura-magenta);
+  --ambient-b: var(--aura-neon);
+  --ambient-c: var(--aura-electric);
   --ambient-energy: 1;
 }
 
 .ambient[data-mood="thinking"] {
-  --ambient-a: var(--color-waiting);
-  --ambient-b: var(--color-accent);
-  --ambient-energy: 0.68;
+  --ambient-a: var(--aura-purple);
+  --ambient-b: var(--aura-cobalt);
+  --ambient-c: var(--aura-electric);
+  --ambient-energy: 0.72;
 }
 
 .ambient[data-mood="speaking"] {
-  --ambient-a: var(--color-done);
-  --ambient-b: var(--color-waiting);
+  --ambient-a: var(--aura-aqua);
+  --ambient-b: var(--aura-teal);
+  --ambient-c: var(--aura-ocean);
   --ambient-energy: 0.9;
 }
 
