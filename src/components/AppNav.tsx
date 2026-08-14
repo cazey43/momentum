@@ -41,6 +41,27 @@ export function AppNav() {
           </Link>
         )
       })}
+
+      {/* Developer tools live below the eight primary areas so the product's
+          nav spec (and its test) stays exactly eight items. */}
+      <div className="hidden md:mt-auto md:block md:pt-4">
+        <span className="px-3 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-faint">
+          Developer
+        </span>
+      </div>
+      <Link
+        href="/studio"
+        aria-current={isActive(pathname, '/studio') ? 'page' : undefined}
+        title="Create and manage Claude Code skills"
+        className={[
+          'shrink-0 rounded-md px-3 py-2 text-sm transition-colors',
+          isActive(pathname, '/studio')
+            ? 'bg-accent-soft font-medium text-ink'
+            : 'text-ink-muted hover:bg-surface-sunken hover:text-ink',
+        ].join(' ')}
+      >
+        Skills Studio
+      </Link>
     </nav>
   )
 }
