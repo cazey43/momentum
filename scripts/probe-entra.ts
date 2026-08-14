@@ -96,7 +96,8 @@ const verdicts: { match: RegExp; secretOk: boolean; verdict: string; fix: string
   {
     match: /AADSTS70008|AADSTS9002313|AADSTS54005|AADSTS70000/,
     secretOk: true,
-    verdict: 'CREDENTIALS ARE GOOD — rejected only because the probe code was fake, which is exactly what we wanted.',
+    verdict:
+      'CREDENTIALS ARE GOOD — rejected only because the probe code was fake, which is exactly what we wanted.',
     fix: 'Nothing. Ready to connect.',
   },
 ]

@@ -56,11 +56,15 @@ if (!account) {
   console.log(`access token stored:   ${account.access_token_encrypted !== null}`)
   console.log(`refresh token stored:  ${account.refresh_token_encrypted !== null}`)
   console.log(`expires:               ${expiresAt?.toISOString() ?? 'null'}`)
-  console.log(`minutes until expiry:  ${expiresAt ? Math.round((expiresAt.getTime() - Date.now()) / 60000) : 'n/a'}`)
+  console.log(
+    `minutes until expiry:  ${expiresAt ? Math.round((expiresAt.getTime() - Date.now()) / 60000) : 'n/a'}`,
+  )
   console.log(`last error:            ${account.last_sync_error ?? 'none'}`)
 
   const forbidden = scopes.filter((s) => /mail\.send|mail\.readwrite|\.write|full_access/i.test(s))
-  console.log(`write/send scopes:     ${forbidden.length === 0 ? 'NONE (correct)' : forbidden.join(' ')}`)
+  console.log(
+    `write/send scopes:     ${forbidden.length === 0 ? 'NONE (correct)' : forbidden.join(' ')}`,
+  )
   console.log(`offline_access:        ${scopes.some((s) => /offline_access/i.test(s))}`)
 
   // --- 2. Live adapter calls -------------------------------------------------
@@ -105,7 +109,9 @@ if (!account) {
 
     const ids = threads.map((t) => t.externalThreadId)
     console.log(`conversationIds unique:${new Set(ids).size}/${ids.length}`)
-    console.log(`avg participants:      ${(threads.reduce((n, t) => n + t.participants.length, 0) / threads.length).toFixed(1)}`)
+    console.log(
+      `avg participants:      ${(threads.reduce((n, t) => n + t.participants.length, 0) / threads.length).toFixed(1)}`,
+    )
 
     // --- 4. Per-thread read ---------------------------------------------------
     console.log('\n=== 4. listMessagesInThread() — conversationId filter + body ===')
