@@ -179,8 +179,10 @@ export function StudioApp({ skills, conflicts, scopes, templates, precedence }: 
           ))}
         </nav>
 
-        {/* Region 2: workspace */}
-        <div className="min-w-0">
+        {/* Region 2: workspace. @container so inner grids respond to THIS
+            column's width, not the viewport (the 3-region layout makes them
+            very different). */}
+        <div className="@container min-w-0">
           {editing && selected ? (
             <SkillEditor
               key={selectedKey}
@@ -408,57 +410,64 @@ function Dashboard({
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">
               {SCOPE_LABEL[group.scope]} · {group.items.length}
             </h2>
-            <div className={grid ? 'grid gap-3 sm:grid-cols-2 xl:grid-cols-3' : 'space-y-2'}>
+            <div className={grid ? 'grid gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3' : 'space-y-2'}>
               {group.items.map((s) => {
                 const k = s.path
+                const isFav = favs.has(s.slug)
                 return (
-                  <button
+                  <div
                     key={k}
-                    type="button"
-                    onClick={() => onSelect(k)}
-                    aria-current={selectedKey === k ? 'true' : undefined}
                     className={cx(
                       CARD,
-                      'block w-full p-4 text-left transition-colors hover:border-line-strong',
+                      'relative transition-[border-color,box-shadow] motion-reduce:transition-none hover:border-line-strong',
                       selectedKey === k && 'border-accent ring-1 ring-accent',
                     )}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-medium text-ink">{s.slug}</span>
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          toggle(s.slug)
-                        }}
-                        className="cursor-pointer text-sm text-ink-faint"
-                        aria-hidden
-                      >
-                        {favs.has(s.slug) ? '★' : '☆'}
-                      </span>
-                    </div>
-                    <p className="mt-1 line-clamp-2 text-xs text-ink-muted">
-                      {s.frontmatter.description || <span className="italic">No description</span>}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span
-                        className={cx(
-                          'rounded-full px-2 py-0.5 text-[0.7rem] font-medium',
-                          STATUS_STYLE[s.status],
+                    <button
+                      type="button"
+                      onClick={() => onSelect(k)}
+                      aria-current={selectedKey === k ? 'true' : undefined}
+                      aria-label={`Select ${s.slug}`}
+                      className="block w-full rounded-card p-4 pr-10 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      <span className="block truncate font-medium text-ink">{s.slug}</span>
+                      <span className="mt-1 line-clamp-2 block text-xs text-ink-muted">
+                        {s.frontmatter.description || (
+                          <span className="italic">No description</span>
                         )}
-                      >
-                        {s.active ? s.status : `${s.status} · shadowed`}
                       </span>
-                      <code
-                        className={cx(
-                          MONO,
-                          'rounded bg-surface-sunken px-1.5 py-0.5 text-ink-muted',
-                        )}
-                      >
-                        {invocationCommand(s.slug)}
-                      </code>
-                      <span className="text-[0.7rem] text-ink-faint">~{s.estimatedTokens} tok</span>
-                    </div>
-                  </button>
+                      <span className="mt-3 flex flex-wrap items-center gap-2">
+                        <span
+                          className={cx(
+                            'rounded-full px-2 py-0.5 text-[0.7rem] font-medium',
+                            STATUS_STYLE[s.status],
+                          )}
+                        >
+                          {s.active ? s.status : `${s.status} · shadowed`}
+                        </span>
+                        <code
+                          className={cx(
+                            MONO,
+                            'rounded bg-surface-sunken px-1.5 py-0.5 text-ink-muted',
+                          )}
+                        >
+                          {invocationCommand(s.slug)}
+                        </code>
+                        <span className="text-[0.7rem] text-ink-faint">
+                          ~{s.estimatedTokens} tok
+                        </span>
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggle(s.slug)}
+                      aria-pressed={isFav}
+                      aria-label={isFav ? `Unfavorite ${s.slug}` : `Favorite ${s.slug}`}
+                      className="absolute top-3 right-3 rounded p-1 text-sm text-ink-faint hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      {isFav ? '★' : '☆'}
+                    </button>
+                  </div>
                 )
               })}
             </div>
@@ -1191,11 +1200,11 @@ function TemplateGallery({
         </select>
       </div>
       <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">Core</h2>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{core.map(card)}</div>
+      <div className="grid gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3">{core.map(card)}</div>
       <h2 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">
         Optional
       </h2>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{optional.map(card)}</div>
+      <div className="grid gap-3 @2xl:grid-cols-2 @4xl:grid-cols-3">{optional.map(card)}</div>
     </section>
   )
 }
